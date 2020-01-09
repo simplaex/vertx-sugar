@@ -11,7 +11,7 @@
   <description>Sugar for Vert.x</description>
   <url>https://github.com/simplaex/vertx-sugar</url>
 
-  <version>2020.01.10</version>
+  <version>2020.01.11</version>
   <packaging>jar</packaging>
 
   <properties>

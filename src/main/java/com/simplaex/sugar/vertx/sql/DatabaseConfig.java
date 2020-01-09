@@ -14,5 +14,4 @@ public interface DatabaseConfig {
     String getDatabasePassword();
 
     String getDatabaseDatabase();
-
 }

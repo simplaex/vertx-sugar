@@ -6,6 +6,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.BodyHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -41,6 +42,7 @@ public class WebServiceVerticle extends AbstractVerticle {
         final Injector injector = VertxInjector.injector(vertx);
         final WebServiceConfig config = getConfig(injector);
         final Router router = Router.router(vertx);
+        router.route().handler(BodyHandler.create());
         injector.getBindings().forEach((key, binding) -> {
             typeOf(binding.getProvider().get(),
                     type(WebServiceRoute.class, route -> {
