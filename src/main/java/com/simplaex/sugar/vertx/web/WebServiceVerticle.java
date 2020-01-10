@@ -10,8 +10,8 @@ import io.vertx.ext.web.handler.BodyHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import static com.simplaex.bedrock.Control.type;
 import static com.simplaex.bedrock.Control.typeOf;
+import static com.simplaex.bedrock.Control.type_;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -45,11 +45,12 @@ public class WebServiceVerticle extends AbstractVerticle {
         router.route().handler(BodyHandler.create());
         injector.getBindings().forEach((key, binding) -> {
             typeOf(binding.getProvider().get(),
-                    type(WebServiceRoute.class, route -> {
-                        final String path = config.getWebServiceApiPrefix() + route.handles();
-                        log.info("Registering route {} on {}", path, route.getClass());
-                        router.route(path).handler(route);
-                        return null;
+                    type_(WebServiceRoute.class, route -> {
+                        route.handles().forEach(p -> {
+                            final String path = config.getWebServiceApiPrefix() + p;
+                            log.info("Registering route {} on {}", path, route.getClass());
+                            router.route(path).handler(route);
+                        });
                     }));
         });
         final HttpServer httpServer = vertx.createHttpServer();
