@@ -4,6 +4,7 @@ import com.google.inject.Module;
 import com.simplaex.bedrock.AsyncExecutionException;
 import com.simplaex.bedrock.EnvironmentVariables;
 import com.simplaex.bedrock.Promise;
+import com.simplaex.sugar.vertx.sql.DatabaseConfig;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
@@ -17,12 +18,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
+import org.flywaydb.core.Flyway;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static com.simplaex.sugar.guice.SimpleModule.instance;
@@ -75,7 +77,7 @@ public class VertxStarter<Config, MainVerticle extends Verticle> {
   public static <Config, MainVerticle extends Verticle> void start(
     @Nonnull final Logger log,
     @Nonnull final Class<Config> configClass,
-    @Nullable final Consumer<Config> prestart,
+    @Nullable final BiConsumer<Logger, Config> prestart,
     @Nonnull final Class<MainVerticle> mainVerticleClass,
     @Nonnull final BiFunction<Vertx, Config, Module> moduleFactory,
     @Nonnull final Supplier<Module>... otherModules
@@ -90,7 +92,7 @@ public class VertxStarter<Config, MainVerticle extends Verticle> {
         otherModules
       );
       if (prestart != null) {
-        prestart.accept(vertxStarter.config);
+        prestart.accept(log, vertxStarter.config);
       }
       vertxStarter.start();
     } catch (final StartupException exc) {
@@ -224,4 +226,20 @@ public class VertxStarter<Config, MainVerticle extends Verticle> {
     ctx.updateLoggers();
   }
 
+  public static void initDatabase(@Nonnull final Logger log, @Nonnull final DatabaseConfig config) {
+    final String jdbcUrl = String.format(
+      "jdbc:postgresql://%s:%s/%s",
+      config.getDatabaseHost(),
+      config.getDatabasePort(),
+      config.getDatabaseDatabase()
+    );
+    log.info("Attempting Flyway migration using jdbcUrl={}", jdbcUrl);
+    Flyway
+      .configure()
+      .dataSource(jdbcUrl, config.getDatabaseUsername(), config.getDatabasePassword())
+      .schemas(config.getDatabaseSchema())
+      .load()
+      .migrate();
+    log.info("Successfully migrated.");
+  }
 }

@@ -5,15 +5,21 @@ import com.simplaex.bedrock.Mapping;
 import com.simplaex.bedrock.Pair;
 import com.simplaex.http.StatusCode;
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import lombok.experimental.UtilityClass;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 @UtilityClass
 public class RouteUtil {
@@ -29,6 +35,7 @@ public class RouteUtil {
         obj.put("cause", cause);
     }
 
+    @Nonnull
     public static Handler<Throwable> errorHandler(
             @Nonnull final RoutingContext context,
             @Nonnull final StatusCode status
@@ -99,6 +106,49 @@ public class RouteUtil {
                 .filter(arr -> arr.length == 2)
                 .map(arr -> Pair.of(arr[0], arr[1]))
                 .collect(ArrayMap.builder());
+    }
+
+    public static void putCorsHeaders(@Nonnull final HttpServerResponse httpServerResponse) {
+        httpServerResponse
+                .putHeader("Access-Control-Allow-Origin", "*")
+                .putHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+                .putHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, User-Agent");
+    }
+
+    public static void forwardRequest(
+            @Nonnull final HttpClient client,
+            @Nonnull final RoutingContext context,
+            @Nonnull final String targetHost,
+            @Nonnegative final int targetPort,
+            @Nullable final Consumer<HttpClientRequest> requestAugmentor,
+            @Nullable final Consumer<HttpServerResponse> responseAugmentor
+    ) {
+        final HttpServerRequest request = context.request();
+        final HttpClientRequest forwardingRequest = client.request(
+                request.method(),
+                targetPort,
+                targetHost,
+                request.uri(),
+                response -> {
+                    final HttpServerResponse resp = context.response();
+                    resp.setStatusCode(response.statusCode());
+                    resp.headers().setAll(response.headers());
+                    if (responseAugmentor != null) {
+                        responseAugmentor.accept(resp);
+                    }
+                    response.handler(resp::write);
+                    response.endHandler(__ -> resp.end());
+                }
+        );
+
+        forwardingRequest.headers().addAll(request.headers());
+        if (requestAugmentor != null) {
+            requestAugmentor.accept(forwardingRequest);
+        }
+        forwardingRequest.setChunked(true);
+
+        request.handler(forwardingRequest::write);
+        request.endHandler(__ -> forwardingRequest.end());
     }
 
 }
