@@ -5,15 +5,15 @@ import com.simplaex.sugar.guice.BindInstance;
 @BindInstance
 public interface DatabaseConfig {
 
-    String getDatabaseHost();
+  String getDatabaseHost();
 
-    int getDatabasePort();
+  int getDatabasePort();
 
-    String getDatabaseUsername();
+  String getDatabaseUsername();
 
-    String getDatabasePassword();
+  String getDatabasePassword();
 
-    String getDatabaseDatabase();
+  String getDatabaseDatabase();
 
-    String getDatabaseSchema();
+  String getDatabaseSchema();
 }

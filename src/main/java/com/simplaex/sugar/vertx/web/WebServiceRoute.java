@@ -7,10 +7,10 @@ import io.vertx.ext.web.RoutingContext;
 
 public interface WebServiceRoute extends Handler<RoutingContext> {
 
-    default Mapping<String, String> redirects() {
-        return Mapping.empty();
-    }
+  default Mapping<String, String> redirects() {
+    return Mapping.empty();
+  }
 
-    Set<String> handles();
+  Set<String> handles();
 
 }

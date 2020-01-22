@@ -11,7 +11,7 @@
   <description>Sugar for Vert.x</description>
   <url>https://github.com/simplaex/vertx-sugar</url>
 
-  <version>2020.01.19</version>
+  <version>2020.01.20</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -29,6 +29,7 @@
     <guice.version>4.2.2</guice.version>
     <vertx.version>3.8.4</vertx.version>
     <log4j.version>2.13.0</log4j.version>
+    <jackson.version>2.10.1</jackson.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -329,6 +330,12 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-jcl</artifactId>
       <version>${log4j.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-cbor</artifactId>
+      <version>${jackson.version}</version>
     </dependency>
 
     <dependency>

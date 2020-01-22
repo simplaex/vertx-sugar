@@ -5,7 +5,7 @@ import com.simplaex.sugar.guice.BindInstance;
 @BindInstance
 public interface WebServiceConfig {
 
-    String getWebServiceApiPrefix();
+  String getWebServiceApiPrefix();
 
-    int getWebServicePort();
+  int getWebServicePort();
 }

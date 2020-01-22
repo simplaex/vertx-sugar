@@ -29,7 +29,7 @@ public class VertxInjector {
   /**
    * Creates a new Injector instance and associates it with the given vertx instance.
    */
-  public static void injector(final Vertx vertx, final Module... modules) throws CreationException {
+  public static Injector injector(final Vertx vertx, final Module... modules) throws CreationException {
     synchronized (injectors) {
       if (injectors.containsKey(vertx)) {
         throw new CreationException(new IllegalStateException("vertx instance is already associated with an injector"));
@@ -41,6 +41,7 @@ public class VertxInjector {
         throw new CreationException(exc);
       }
       injectors.put(vertx, injector);
+      return injector;
     }
   }
 

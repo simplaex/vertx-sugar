@@ -1,5 +1,6 @@
 package com.simplaex.sugar.vertx;
 
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.simplaex.bedrock.AsyncExecutionException;
 import com.simplaex.bedrock.EnvironmentVariables;
@@ -9,8 +10,12 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.file.FileSystem;
 import io.vertx.core.logging.Log4j2LogDelegateFactory;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.spi.VerticleFactory;
+import io.vertx.ext.web.Router;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.Level;
@@ -138,7 +143,18 @@ public class VertxStarter<Config, MainVerticle extends Verticle> {
     try {
       final VertxOptions vertxOptions = new VertxOptions();
       // put vertx options here
-      return Vertx.vertx(vertxOptions);
+      final Vertx vertx = Vertx.vertx(vertxOptions);
+      vertx.registerVerticleFactory(new GenericVerticleFactory("guice", (verticleName, classLoader) -> {
+        final Injector injector = VertxInjector.injector(vertx);
+        final String clazzName = VerticleFactory.removePrefix(verticleName);
+        final Class<?> clazz = classLoader.loadClass(clazzName);
+        if (!Verticle.class.isAssignableFrom(clazz)) {
+          throw new IllegalArgumentException(clazzName + " does not implement the Verticle interface");
+        }
+        @SuppressWarnings("unchecked") final Class<? extends Verticle> verticleClass = (Class<? extends Verticle>) clazz;
+        return injector.getInstance(verticleClass);
+      }));
+      return vertx;
     } catch (final Exception exc) {
       throw new StartupException("Failed to start vertx", exc);
     }
@@ -165,7 +181,7 @@ public class VertxStarter<Config, MainVerticle extends Verticle> {
     }
   }
 
-  private void initializeGuiceApplication() throws StartupException {
+  private Injector initializeGuiceApplication() throws StartupException {
     // Create an array of n + 2 items:
     // - 1 for the application module (at index 0)
     // - 1 for an ad-hoc module that binds vertx and configuration instances (at index 1)
@@ -182,6 +198,9 @@ public class VertxStarter<Config, MainVerticle extends Verticle> {
     // Initialize said ad-hoc module at index=1
     modules[1] = module(
       instance(Vertx.class, vertx),
+      instance(EventBus.class, vertx.eventBus()),
+      instance(FileSystem.class, vertx.fileSystem()),
+      instance(Router.class, Router.router(vertx)),
       instance(configClass, config)
     );
     // Finally initialize the main module at index=0
@@ -191,7 +210,7 @@ public class VertxStarter<Config, MainVerticle extends Verticle> {
       throw new StartupException("Failed to create main module", exc);
     }
     try {
-      VertxInjector.injector(vertx, modules);
+      return VertxInjector.injector(vertx, modules);
     } catch (final Exception exc) {
       throw new StartupException("Failed to create Guice injector", exc);
     }
@@ -199,12 +218,13 @@ public class VertxStarter<Config, MainVerticle extends Verticle> {
 
   private void start() throws StartupException {
     log.info("Starting up...");
-    initializeGuiceApplication();
+    final Injector injector = initializeGuiceApplication();
 
     // Bring up the MainVerticle which is supposed to deploy (i.e. start) everything.
     final DeploymentOptions deploymentOptions = new DeploymentOptions();
     final Promise<String> promise = Promise.promise();
-    vertx.deployVerticle(mainVerticleClass, deploymentOptions, result -> {
+    final Verticle mainVerticle = injector.getInstance(mainVerticleClass);
+    vertx.deployVerticle(mainVerticle, deploymentOptions, result -> {
       if (!result.succeeded()) {
         promise.fail(result.cause());
       } else {
