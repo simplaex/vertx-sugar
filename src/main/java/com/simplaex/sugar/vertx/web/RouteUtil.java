@@ -3,6 +3,7 @@ package com.simplaex.sugar.vertx.web;
 import com.simplaex.bedrock.ArrayMap;
 import com.simplaex.bedrock.Mapping;
 import com.simplaex.bedrock.Pair;
+import com.simplaex.bedrock.Seq;
 import com.simplaex.http.StatusCode;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
@@ -20,19 +21,26 @@ import javax.annotation.Nullable;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 @UtilityClass
 @Log4j2
 public class RouteUtil {
 
-  public static void appendCause(final JsonObject obj, final Throwable exc) {
+  public static void appendCause(final JsonObject obj, @Nullable final Throwable exc) {
     if (exc == null) {
       return;
     }
     final JsonObject cause = new JsonObject();
     cause.put("exception", exc.getClass().getName());
-    cause.put("message", exc.getMessage());
+    cause.put("message", Optional.ofNullable(exc.getMessage()).orElse(""));
+    final Seq<StackTraceElement> stackTrace = Seq.wrap(exc.getStackTrace());
+    stackTrace.headOptional().ifPresent(trace -> cause.put("location", new JsonObject()
+      .put("class", trace.getClassName())
+      .put("method", trace.getMethodName())
+      .put("file", trace.getFileName())
+      .put("line", trace.getLineNumber())));
     appendCause(cause, exc.getCause());
     obj.put("cause", cause);
   }
