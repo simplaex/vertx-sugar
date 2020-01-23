@@ -1,4 +1,4 @@
-package com.simplaex.sugar.vertx;
+package com.simplaex.sugar.vertx.codec;
 
 import io.vertx.core.eventbus.MessageCodec;
 import lombok.RequiredArgsConstructor;

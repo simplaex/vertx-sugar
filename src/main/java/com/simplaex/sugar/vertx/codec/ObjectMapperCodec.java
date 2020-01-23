@@ -1,26 +1,21 @@
-package com.simplaex.sugar.vertx;
+package com.simplaex.sugar.vertx.codec;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
+import com.simplaex.sugar.vertx.codec.ValueCodec;
 import io.vertx.core.buffer.Buffer;
 import lombok.SneakyThrows;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
-public class CborCodec<T> extends UserCodec<T, T> {
+public class ObjectMapperCodec<T> extends ValueCodec<T> {
 
   private final ObjectMapper mapper;
-  private final Class<T> clazz;
 
-  public CborCodec(@Nonnull final Class<T> clazz) {
-    super(clazz.getCanonicalName());
-    this.mapper = new ObjectMapper(new CBORFactory());
-    this.clazz = clazz;
-  }
-
-  public static <T> CborCodec<T> forClass(final Class<T> clazz) {
-    return new CborCodec<>(clazz);
+  public ObjectMapperCodec(@Nonnull final Class<T> clazz, @Nonnull final JsonFactory jsonFactory) {
+    super(clazz);
+    this.mapper = new ObjectMapper(jsonFactory);
   }
 
   @Override
@@ -37,11 +32,6 @@ public class CborCodec<T> extends UserCodec<T, T> {
     final int len = buffer.getInt(pos);
     final byte[] bytes = new byte[len];
     buffer.getBytes(pos, pos + 4 + len, bytes);
-    return mapper.readValue(bytes, clazz);
-  }
-
-  @Override
-  public T transform(final T t) {
-    return t;
+    return mapper.readValue(bytes, getForClass());
   }
 }
