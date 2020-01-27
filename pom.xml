@@ -11,17 +11,10 @@
   <description>Sugar for Vert.x</description>
   <url>https://github.com/simplaex/vertx-sugar</url>
 
-  <version>2020.01.24</version>
+  <version>2020.01.27</version>
   <packaging>jar</packaging>
 
   <properties>
-    <coverage.branch.minimum>0.0</coverage.branch.minimum>
-    <coverage.instruction.minimum>0.0</coverage.instruction.minimum>
-    <coverage.branch.class.minimum>0.0</coverage.branch.class.minimum>
-    <coverage.instruction.class.minimum>0.0</coverage.instruction.class.minimum>
-    <coverage.branch.method.minimum>0.0</coverage.branch.method.minimum>
-    <coverage.instruction.method.minimum>0.0</coverage.instruction.method.minimum>
-
     <findbugs.version>3.0.2</findbugs.version>
     <java.version>1.8</java.version>
     <junit.version>4.12</junit.version>
@@ -171,89 +164,6 @@
           <configLocation>${project.basedir}/checkstyle.xml</configLocation>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.5</version>
-        <executions>
-          <execution>
-            <id>default-prepare-agent</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>check</id>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <rule>
-                  <element>CLASS</element>
-                  <limits>
-                    <limit>
-                      <counter>INSTRUCTION</counter>
-                      <value>COVEREDRATIO</value>
-                      <minimum>${coverage.instruction.class.minimum}</minimum>
-                    </limit>
-                  </limits>
-                </rule>
-                <rule>
-                  <element>CLASS</element>
-                  <limits>
-                    <limit>
-                      <counter>BRANCH</counter>
-                      <value>COVEREDRATIO</value>
-                      <minimum>${coverage.branch.class.minimum}</minimum>
-                    </limit>
-                  </limits>
-                </rule>
-                <rule>
-                  <element>METHOD</element>
-                  <limits>
-                    <limit>
-                      <counter>INSTRUCTION</counter>
-                      <value>COVEREDRATIO</value>
-                      <minimum>${coverage.instruction.method.minimum}</minimum>
-                    </limit>
-                  </limits>
-                </rule>
-                <rule>
-                  <element>METHOD</element>
-                  <limits>
-                    <limit>
-                      <counter>BRANCH</counter>
-                      <value>COVEREDRATIO</value>
-                      <minimum>${coverage.branch.method.minimum}</minimum>
-                    </limit>
-                  </limits>
-                </rule>
-                <rule>
-                  <element>BUNDLE</element>
-                  <limits>
-                    <limit>
-                      <counter>INSTRUCTION</counter>
-                      <value>COVEREDRATIO</value>
-                      <minimum>${coverage.instruction.minimum}</minimum>
-                    </limit>
-                  </limits>
-                </rule>
-                <rule>
-                  <element>BUNDLE</element>
-                  <limits>
-                    <limit>
-                      <counter>BRANCH</counter>
-                      <value>COVEREDRATIO</value>
-                      <minimum>${coverage.branch.minimum}</minimum>
-                    </limit>
-                  </limits>
-                </rule>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
@@ -299,7 +209,7 @@
     <dependency>
       <groupId>com.simplaex</groupId>
       <artifactId>bedrock</artifactId>
-      <version>2020.01.23</version>
+      <version>2020.01.27</version>
     </dependency>
 
     <dependency>
@@ -341,7 +251,7 @@
     <dependency>
       <groupId>com.simplaex</groupId>
       <artifactId>http-status-codes</artifactId>
-      <version>2020.01.09</version>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
