@@ -2,10 +2,10 @@ package com.simplaex.sugar.vertx.web;
 
 import com.simplaex.http.StatusCode;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-import scala.concurrent.Future;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,7 +35,7 @@ public class HealthAndStatusReporter implements Handler<RoutingContext> {
       .map(JsonObject::new)
       .orElseGet(JsonObject::new);
     this.statusInfo = statusInfoHandler == null
-      ? (handler -> handler.handle((AsyncResult<?>) Future.successful("ok")))
+      ? (handler -> handler.handle((AsyncResult<?>) Future.succeededFuture("ok")))
       : statusInfoHandler;
   }
 
