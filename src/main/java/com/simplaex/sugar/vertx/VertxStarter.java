@@ -5,6 +5,7 @@ import com.google.inject.Module;
 import com.simplaex.bedrock.AsyncExecutionException;
 import com.simplaex.bedrock.EnvironmentVariables;
 import com.simplaex.bedrock.Promise;
+import com.simplaex.bedrock.Try;
 import com.simplaex.sugar.vertx.sql.DatabaseConfig;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Verticle;
@@ -242,7 +243,8 @@ public class VertxStarter<Config, MainVerticle extends Verticle> {
   private static void adjustLoggingConfig() {
     final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
     final Configuration config = ctx.getConfiguration();
-    config.getRootLogger().setLevel(Level.INFO);
+    final Level logLevel = Try.execute(() -> System.getenv("LOGGING_LEVEL")).map(Level::valueOf).orElse(Level.INFO);
+    config.getRootLogger().setLevel(logLevel);
     ctx.updateLoggers();
   }
 
