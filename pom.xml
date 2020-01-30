@@ -11,7 +11,7 @@
   <description>Sugar for Vert.x</description>
   <url>https://github.com/simplaex/vertx-sugar</url>
 
-  <version>2020.01.29</version>
+  <version>2020.01.30</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -209,7 +209,13 @@
     <dependency>
       <groupId>com.simplaex</groupId>
       <artifactId>bedrock</artifactId>
-      <version>2020.01.27</version>
+      <version>2020.01.30</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.simplaex</groupId>
+      <artifactId>metrics</artifactId>
+      <version>1.0</version>
     </dependency>
 
     <dependency>
